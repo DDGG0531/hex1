@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB"
+    crossorigin="anonymous">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp"
+    crossorigin="anonymous">
+  <link rel="stylesheet" href="all.css">
+</head>
+
+<body>
+  <div id="app">
+    <!-- 上方欄位   -->
+    <div id="nav">
+      <div class="container">
+        <div class="row">
+          <div class="col text-center " :class="{'active':filter=='all'}" @click="filter='all'">My Tasks</div>
+          <div class="col text-center" :class="{'active':filter=='inProgress'}" @click="filter='inProgress'">In Progress</div>
+          <div class="col text-center" :class="{'active':filter=='completed'}" @click="filter='completed'">Completed</div>
+        </div>
+      </div>
+
+    </div>
+    <!-- add白框 -->
+    <div id="add-white" class="my-3" v-if="tempTodo.edit==false">
+      <div class="container" @click="tempTodo.edit=true">
+        <div class="row">
+          <input type="text" placeholder="+ Add Task" :readonly="true" class="w-100 p-3 pointer" >
+        </div>
+      </div>
+
+    </div>
+    <!-- add 展開區塊-->
+    <div class="add" v-if="tempTodo.edit==true">
+      <div class="container">
+        <div class="row top">
+          <!-- <div class="col-auto align-self-center">
+            <div class="custom-control custom-checkbox">
+              <input type="checkbox" class="" id="customCheck1" >
+            </div>
+  
+          </div> -->
+          <div class="col">
+            <input type="text" class=" input-bg" placeholder="Type Something Here…" :readonly="false" v-model="tempTodo.title">
+          </div>
+          <div class="col-auto align-self-center">
+            <i class="fa-star pointer " @click="tempTodo.marked=!tempTodo.marked" :class="{fas:tempTodo.marked,far:!tempTodo.marked}"
+              style="color:#F5A623"> </i>
+
+          </div>
+          <div class="col-auto align-self-center">
+            <i class="fa-edit pointer" :class="{fas:tempTodo.edit,far:!tempTodo.edit}" style="color:blue"> </i>
+
+          </div>
+        </div>
+        <div class=" middle">
+          <div class=" deadline">
+            <div>
+              <i class="fas fa-calendar-alt"></i>
+              <p class="d-inline deadline-title">Deadline</p>
+            </div>
+            <div class="more-padding">
+              <div class="row">
+                <div class="col-4 first-el">
+                  <input type="text" class="form-control" placeholder="yyyy/mm/dd" v-model="tempTodo['deadline-front']">
+                </div>
+                <div class="col-4 second-el">
+                  <input type="text" class="form-control" placeholder="hh/mm" v-model="tempTodo['deadline-back']">
+                </div>
+              </div>
+            </div>
+
+          </div>
+          <div class="file">
+            <div>
+              <i class="far fa-file"></i>
+              <p class="d-inline file-title">File</p>
+            </div>
+            <div class="more-padding">
+              <i class="far fa-plus-square fa-2x pointer"></i>
+            </div>
+          </div>
+          <div class="comment">
+            <div>
+              <i class="far fa-comment-dots"></i>
+              <p class="d-inline comment-title">Comment</p>
+            </div>
+            <div class="more-padding">
+              <textarea v-model="tempTodo.comment" class="form-control" :id="tempTodo.id" rows="5" placeholder="Type your memo here ..."></textarea>
+            </div>
+          </div>
+
+        </div>
+        <div class="bot">
+          <div class="row">
+            <div class="col-6 text-center cancel-btn" @click="cancelEdit()">
+              <i class="fas fa-times"></i> Cancel</div>
+            <div class="col-6 text-center add-btn" @click="sendEdit()">
+              <i class="fas fa-plus"></i> Add Task</div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!--  each 區塊  -->
+    <div id="each">
+      <div v-for="item in filterTodo" :key="item.id">
+        <!-- add 展開區塊-->
+        <div class="add" v-if="item.edit==true">
+          <div class="container">
+            <div class="row top">
+              <!-- <div class="col-auto align-self-center">
+                    <div class="custom-control custom-checkbox">
+                      <input type="checkbox" class="" id="customCheck1" >
+                    </div>
+          
+                  </div> -->
+              <div class="col">
+                <input type="text" class=" input-bg" placeholder="Type Something Here…" :readonly="false" v-model="tempTodoOld.title">
+              </div>
+              <div class="col-auto align-self-center">
+                <i class="fa-star pointer " @click="tempTodoOld.marked=!tempTodoOld.marked" :class="{fas:tempTodoOld.marked,far:!tempTodoOld.marked}"
+                  style="color:red"> </i>
+
+              </div>
+              <div class="col-auto align-self-center">
+                <i class="fa-edit pointer" :class="{fas:tempTodoOld.edit,far:!tempTodoOld.edit}" style="color:blue"> </i>
+
+              </div>
+            </div>
+            <div class=" middle">
+              <div class=" deadline">
+                <div>
+                  <i class="fas fa-calendar-alt"></i>
+                  <p class="d-inline deadline-title">Deadline</p>
+                </div>
+                <div class="more-padding">
+                  <div class="row">
+                    <div class="col-4 first-el">
+                      <input type="text" class="form-control" placeholder="yyyy/mm/dd" v-model="tempTodoOld['deadline-front']">
+                    </div>
+                    <div class="col-4 second-el">
+                      <input type="text" class="form-control" placeholder="hh/mm" v-model="tempTodoOld['deadline-back']">
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+              <div class="file">
+                <div>
+                  <i class="far fa-file"></i>
+                  <p class="d-inline file-title">File</p>
+                </div>
+                <div class="more-padding">
+                  <i class="far fa-plus-square fa-2x pointer"></i>
+                </div>
+              </div>
+              <div class="comment">
+                <div>
+                  <i class="far fa-comment-dots"></i>
+                  <p class="d-inline comment-title">Comment</p>
+                </div>
+                <div class="more-padding">
+                  <textarea v-model="tempTodoOld.comment" class="form-control" :id="item.id" rows="5" placeholder="Type your memo here ..."></textarea>
+                </div>
+              </div>
+
+            </div>
+            <div class="bot">
+              <div class="row">
+                <div class="col-6 text-center cancel-btn" @click="forgetEdit(item)">
+                  <i class="fas fa-times"></i> Cancel</div>
+                <div class="col-6 text-center add-btn" @click="saveEdit(item)">
+                  <i class="fas fa-plus"></i> Save Task</div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+        <!-- closeblock -->
+        <div class="close-block" v-if="item.edit==false">
+          <div class="container">
+              <div class="row top">
+                  <div class="col ">
+                    <div class="custom-control custom-checkbox">
+                      <input type="checkbox" class="custom-control-input" :id="item.id" v-model="item.done">
+                      <label class="custom-control-label" :for="item.id" style="font-size:24px;line-height:28px" :class="{'line-through':item.done==true}">{{item.title}}</label>
+                    </div>
+                    
+          
+                  </div>
+                  <div class="col-auto"><i class="fa-star pointer" :class="{fas:item.marked,'marked-star':item.marked,far:!item.marked}" @click="item.marked =!item.marked"> </i>
+        
+                  </div>
+                  <div class="col-auto"><i class="fa-edit pointer" :class="{fas:item.edit,'marked-pen':item.edit,far:!item.edit}" @click="initEdit(item);item.edit =!item.edit"> </i>
+
+                  </div>
+                </div>
+                <div class="row icon-list">
+                  <div class="col"><i class="far fa-calendar-alt"></i>
+                    {{item['deadline-total']}}
+                    <i class="far fa-file"></i> <i class="far fa-comment-dots"></i>
+                    {{item['comment']}}
+                  </div>
+          
+                </div>
+          </div>
+        </div>
+      </div>
+
+
+    </div>
+
+
+
+
+  </div>
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.16/vue.js'></script>
+  <script src="./all.js"></script>
+</body>
+
+</html>
